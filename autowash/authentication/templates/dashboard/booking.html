@@ -1,0 +1,309 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book a Service - AutoWash Hub</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+      }
+      .navbar-brand {
+        font-weight: bold;
+        color: #0d6efd;
+      }
+      .dashboard-container {
+        padding: 30px;
+      }
+      .booking-card {
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+        margin-bottom: 30px;
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+      .service-option {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      .service-option:hover {
+        border-color: #0d6efd;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+      .service-option.selected {
+        border-color: #0d6efd;
+        background-color: rgba(13, 110, 253, 0.05);
+      }
+      .service-option input[type="radio"] {
+        margin-right: 10px;
+      }
+      .btn-book {
+        font-weight: bold;
+        padding: 10px 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="#">AutoWash Hub</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="{% url 'booking' %}"
+                >Book Service</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'mybookings' %}">My Bookings</a>
+            </li>
+          </ul>
+          <ul class="navbar-nav">
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                id="navbarDropdown"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                {{ request.user.username }}
+              </a>
+              <ul
+                class="dropdown-menu dropdown-menu-end"
+                aria-labelledby="navbarDropdown"
+              >
+                <li>
+                  <a class="dropdown-item" href="{% url 'profile' %}"
+                    >My Profile</a
+                  >
+                </li>
+                <li>
+                  <hr class="dropdown-divider" />
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container dashboard-container">
+      {% if messages %} {% for message in messages %}
+      <div
+        class="alert alert-{{ message.tags }} alert-dismissible fade show"
+        role="alert"
+      >
+        {{ message }}
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+      {% endfor %} {% endif %}
+
+      <div class="booking-card">
+        <h2 class="mb-4">Book a Car Wash Service</h2>
+        <form method="post" action="{% url 'booking' %}">
+          {% csrf_token %}
+
+          <div class="form-group">
+            <label for="vehicle_type" class="form-label">Vehicle Type</label>
+            <select
+              class="form-select"
+              id="vehicle_type"
+              name="vehicle_type"
+              required
+            >
+              <option value="" selected disabled>
+                Select your vehicle type
+              </option>
+              <option value="SEDAN">Sedan</option>
+              <option value="SUV">SUV</option>
+              <option value="TRUCK">Truck</option>
+              <option value="VAN">Van</option>
+              <option value="MOTORCYCLE">Motorcycle</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="vehicle_make" class="form-label">Vehicle Make</label>
+            <input
+              type="text"
+              class="form-control"
+              id="vehicle_make"
+              name="vehicle_make"
+              placeholder="e.g. Toyota, Honda, Ford"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="vehicle_model" class="form-label">Vehicle Model</label>
+            <input
+              type="text"
+              class="form-control"
+              id="vehicle_model"
+              name="vehicle_model"
+              placeholder="e.g. Camry, Civic, F-150"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="license_plate" class="form-label">License Plate</label>
+            <input
+              type="text"
+              class="form-control"
+              id="license_plate"
+              name="license_plate"
+              placeholder="e.g. ABC-123"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Select Service</label>
+            <div class="service-options">
+              {% for service in services %}
+              <div
+                class="service-option"
+                onclick="selectService('service_{{ service.id }}')"
+              >
+                <input
+                  type="radio"
+                  name="service"
+                  id="service_{{ service.id }}"
+                  value="{{ service.id }}"
+                  {%
+                  if
+                  forloop.first
+                  %}required{%
+                  endif
+                  %}
+                />
+                <label for="service_{{ service.id }}">
+                  <h5>{{ service.name }} - ${{ service.price }}</h5>
+                  <p class="mb-0">{{ service.description }}</p>
+                  <small class="text-muted"
+                    >Duration: {{ service.duration_minutes }} minutes</small
+                  >
+                </label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="date" class="form-label">Preferred Date</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  id="date"
+                  name="date"
+                  required
+                />
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="time" class="form-label">Preferred Time</label>
+                <select class="form-select" id="time" name="time" required>
+                  <option value="" selected disabled>Select a time slot</option>
+                  <option value="09:00">9:00 AM</option>
+                  <option value="10:00">10:00 AM</option>
+                  <option value="11:00">11:00 AM</option>
+                  <option value="12:00">12:00 PM</option>
+                  <option value="13:00">1:00 PM</option>
+                  <option value="14:00">2:00 PM</option>
+                  <option value="15:00">3:00 PM</option>
+                  <option value="16:00">4:00 PM</option>
+                  <option value="17:00">5:00 PM</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="notes" class="form-label"
+              >Additional Notes (Optional)</label
+            >
+            <textarea
+              class="form-control"
+              id="notes"
+              name="notes"
+              rows="3"
+              placeholder="Any special requests or instructions for our team"
+            ></textarea>
+          </div>
+
+          <div class="mt-4">
+            <button type="submit" class="btn btn-primary btn-book">
+              Book Now
+            </button>
+            <a
+              href="{% url 'dashboard' %}"
+              class="btn btn-outline-secondary ms-2"
+              >Cancel</a
+            >
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      function selectService(serviceId) {
+        // Clear previous selections
+        document.querySelectorAll(".service-option").forEach((option) => {
+          option.classList.remove("selected");
+        });
+
+        // Select the clicked service
+        const selectedOption = document
+          .getElementById(serviceId)
+          .closest(".service-option");
+        selectedOption.classList.add("selected");
+        document.getElementById(serviceId).checked = true;
+      }
+
+      // Set minimum date to today
+      const today = new Date().toISOString().split("T")[0];
+      document.getElementById("date").setAttribute("min", today);
+    </script>
+  </body>
+</html>

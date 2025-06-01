@@ -1,0 +1,347 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Bookings - AutoWash Hub</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+      }
+      .navbar-brand {
+        font-weight: bold;
+        color: #0d6efd;
+      }
+      .dashboard-container {
+        padding: 30px;
+      }
+      .booking-card {
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+        margin-bottom: 30px;
+      }
+      .booking-item {
+        border-left: 4px solid #0d6efd;
+        padding: 15px;
+        margin-bottom: 20px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+      }
+      .booking-item.completed {
+        border-left-color: #198754;
+      }
+      .booking-item.cancelled {
+        border-left-color: #dc3545;
+      }
+      .booking-item.pending {
+        border-left-color: #ffc107;
+      }
+      .status-badge {
+        font-size: 0.85rem;
+        padding: 5px 10px;
+      }
+      .booking-details {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #dee2e6;
+      }
+      .filter-section {
+        margin-bottom: 20px;
+      }
+      .no-bookings {
+        text-align: center;
+        padding: 50px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="#">AutoWash Hub</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'booking' %}">Book Service</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="{% url 'mybookings' %}"
+                >My Bookings</a
+              >
+            </li>
+          </ul>
+          <ul class="navbar-nav">
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                id="navbarDropdown"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                {{ request.user.username }}
+              </a>
+              <ul
+                class="dropdown-menu dropdown-menu-end"
+                aria-labelledby="navbarDropdown"
+              >
+                <li>
+                  <a class="dropdown-item" href="{% url 'profile' %}"
+                    >My Profile</a
+                  >
+                </li>
+                <li>
+                  <hr class="dropdown-divider" />
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container dashboard-container">
+      {% if messages %} {% for message in messages %}
+      <div
+        class="alert alert-{{ message.tags }} alert-dismissible fade show"
+        role="alert"
+      >
+        {{ message }}
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+      {% endfor %} {% endif %}
+
+      <div class="booking-card">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2 class="mb-0">My Booking History</h2>
+          <a href="{% url 'booking' %}" class="btn btn-primary"
+            >Book New Service</a
+          >
+        </div>
+
+        <div class="filter-section">
+          <div class="row">
+            <div class="col-md-4">
+              <select
+                class="form-select"
+                id="statusFilter"
+                aria-label="Filter bookings by status"
+              >
+                <option value="all" selected>All Bookings</option>
+                <option value="pending">Pending</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <input
+                type="date"
+                class="form-control"
+                id="dateFilter"
+                placeholder="Filter by date"
+              />
+            </div>
+            <div class="col-md-4">
+              <button class="btn btn-outline-secondary w-100" id="resetFilters">
+                Reset Filters
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Real bookings from database -->
+        <div id="bookingsList">
+          {% if bookings %} {% for booking in bookings %}
+          <div
+            class="booking-item {{ booking.status|lower }}"
+            data-date="{{ booking.date_time|date:'Y-m-d' }}"
+          >
+            <div class="d-flex justify-content-between">
+              <div>
+                <h5>{{ booking.service.name }}</h5>
+                <p class="mb-1">
+                  <strong>Booking ID:</strong> #{{ booking.booking_id }}
+                </p>
+                <p class="mb-1">
+                  <strong>Date & Time:</strong> {{ booking.date_time|date:"F d,
+                  Y" }} at {{ booking.date_time|time:"g:i A" }}
+                </p>
+              </div>
+              <div class="text-end">
+                {% if booking.status == 'PENDING' %}
+                <span class="badge bg-warning text-dark status-badge"
+                  >Pending</span
+                >
+                {% elif booking.status == 'COMPLETED' %}
+                <span class="badge bg-success status-badge">Completed</span>
+                {% elif booking.status == 'CANCELLED' %}
+                <span class="badge bg-danger status-badge">Cancelled</span>
+                {% endif %}
+                <p class="mb-1 mt-2">
+                  <strong>Price:</strong> ${{ booking.service.price }}
+                </p>
+              </div>
+            </div>
+            <div class="booking-details">
+              <div class="row">
+                <div class="col-md-6">
+                  <p class="mb-1">
+                    <strong>Vehicle:</strong> {{ booking.vehicle_make }} {{
+                    booking.vehicle_model }} ({{ booking.vehicle_type }})
+                  </p>
+                  <p class="mb-1">
+                    <strong>License Plate:</strong> {{ booking.license_plate }}
+                  </p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                  {% if booking.status == 'PENDING' %}
+                  <a
+                    href="{% url 'reschedule_booking' booking.id %}"
+                    class="btn btn-sm btn-outline-primary"
+                    >Reschedule</a
+                  >
+                  <a
+                    href="{% url 'cancel_booking' booking.id %}"
+                    class="btn btn-sm btn-outline-danger"
+                    >Cancel</a
+                  >
+                  {% elif booking.status == 'COMPLETED' %}
+                  <a
+                    href="{% url 'book_again' booking.id %}"
+                    class="btn btn-sm btn-outline-primary"
+                    >Book Again</a
+                  >
+                  <a
+                    href="{% url 'view_receipt' booking.id %}"
+                    class="btn btn-sm btn-outline-secondary"
+                    >View Receipt</a
+                  >
+                  {% elif booking.status == 'CANCELLED' %}
+                  <a
+                    href="{% url 'book_again' booking.id %}"
+                    class="btn btn-sm btn-outline-primary"
+                    >Book Again</a
+                  >
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %} {% else %}
+          <!-- If no bookings are found -->
+          <div class="no-bookings">
+            <img
+              src="{% static 'authentication/images/no-bookings.svg' %}"
+              alt="No Bookings"
+              width="150"
+              class="mb-3"
+            />
+            <h4>No bookings found</h4>
+            <p class="text-muted">You haven't made any bookings yet.</p>
+            <a href="{% url 'booking' %}" class="btn btn-primary mt-2"
+              >Book Your First Service</a
+            >
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Filter functionality
+      document.addEventListener("DOMContentLoaded", function () {
+        const statusFilter = document.getElementById("statusFilter");
+        const dateFilter = document.getElementById("dateFilter");
+        const resetFilters = document.getElementById("resetFilters");
+        const bookingsList = document.getElementById("bookingsList");
+        const bookingItems = bookingsList.querySelectorAll(".booking-item");
+        const noBookings = document.querySelector(".no-bookings");
+
+        function applyFilters() {
+          let visibleCount = 0;
+
+          bookingItems.forEach((item) => {
+            let statusMatch = true;
+            let dateMatch = true;
+
+            // Status filter
+            if (statusFilter.value !== "all") {
+              statusMatch = item.classList.contains(statusFilter.value);
+            }
+
+            // Date filter
+            if (dateFilter.value) {
+              const bookingDate = item.getAttribute("data-date");
+              dateMatch = bookingDate === dateFilter.value;
+            }
+
+            if (statusMatch && dateMatch) {
+              item.style.display = "block";
+              visibleCount++;
+            } else {
+              item.style.display = "none";
+            }
+          });
+
+          // Show "no bookings" message if no items are visible
+          if (visibleCount === 0 && bookingItems.length > 0) {
+            if (noBookings) {
+              noBookings.style.display = "block";
+            }
+          } else {
+            if (noBookings) {
+              noBookings.style.display = "none";
+            }
+          }
+        }
+
+        // Event listeners
+        if (statusFilter) {
+          statusFilter.addEventListener("change", applyFilters);
+        }
+
+        if (dateFilter) {
+          dateFilter.addEventListener("change", applyFilters);
+        }
+
+        if (resetFilters) {
+          resetFilters.addEventListener("click", function () {
+            if (statusFilter) statusFilter.value = "all";
+            if (dateFilter) dateFilter.value = "";
+            applyFilters();
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

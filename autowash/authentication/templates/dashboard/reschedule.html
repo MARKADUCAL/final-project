@@ -1,0 +1,183 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reschedule Booking - AutoWash Hub</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+      }
+      .navbar-brand {
+        font-weight: bold;
+        color: #0d6efd;
+      }
+      .dashboard-container {
+        padding: 30px;
+      }
+      .booking-card {
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+        margin-bottom: 30px;
+      }
+      .booking-details {
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-left: 4px solid #0d6efd;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="#">AutoWash Hub</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'booking' %}">Book Service</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'mybookings' %}">My Bookings</a>
+            </li>
+          </ul>
+          <ul class="navbar-nav">
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                id="navbarDropdown"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                {{ request.user.username }}
+              </a>
+              <ul
+                class="dropdown-menu dropdown-menu-end"
+                aria-labelledby="navbarDropdown"
+              >
+                <li>
+                  <a class="dropdown-item" href="{% url 'profile' %}"
+                    >My Profile</a
+                  >
+                </li>
+                <li>
+                  <hr class="dropdown-divider" />
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container dashboard-container">
+      {% if messages %} {% for message in messages %}
+      <div
+        class="alert alert-{{ message.tags }} alert-dismissible fade show"
+        role="alert"
+      >
+        {{ message }}
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+      {% endfor %} {% endif %}
+
+      <div class="booking-card">
+        <h2 class="mb-4">Reschedule Booking</h2>
+
+        <div class="booking-details mb-4">
+          <h5>{{ booking.service.name }}</h5>
+          <p class="mb-1">
+            <strong>Booking ID:</strong> #{{ booking.booking_id }}
+          </p>
+          <p class="mb-1">
+            <strong>Current Date & Time:</strong> {{ booking.date_time|date:"F
+            d, Y" }} at {{ booking.date_time|time:"g:i A" }}
+          </p>
+          <p class="mb-1">
+            <strong>Vehicle:</strong> {{ booking.vehicle_make }} {{
+            booking.vehicle_model }} ({{ booking.vehicle_type }})
+          </p>
+          <p class="mb-0">
+            <strong>License Plate:</strong> {{ booking.license_plate }}
+          </p>
+        </div>
+
+        <form method="POST">
+          {% csrf_token %}
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <label for="date" class="form-label">New Date</label>
+              <input
+                type="date"
+                class="form-control"
+                id="date"
+                name="date"
+                required
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="time" class="form-label">New Time</label>
+              <input
+                type="time"
+                class="form-control"
+                id="time"
+                name="time"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="d-flex">
+            <button type="submit" class="btn btn-primary">
+              Confirm Reschedule
+            </button>
+            <a
+              href="{% url 'mybookings' %}"
+              class="btn btn-outline-secondary ms-2"
+              >Cancel</a
+            >
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Set minimum date to today
+      const today = new Date().toISOString().split("T")[0];
+      document.getElementById("date").setAttribute("min", today);
+    </script>
+  </body>
+</html>
