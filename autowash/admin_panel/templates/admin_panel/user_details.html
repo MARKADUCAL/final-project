@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Services | Admin Panel | AutoWash Hub</title>
+    <title>User Details | Admin Panel | AutoWash Hub</title>
     <!-- Bootstrap CSS -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
@@ -38,13 +38,6 @@
       .content-area {
         padding: 20px;
       }
-      .service-card {
-        transition: all 0.3s ease;
-      }
-      .service-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-      }
     </style>
   </head>
   <body>
@@ -62,15 +55,12 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a href="{% url 'admin_users' %}" class="sidebar-link">
+                <a href="{% url 'admin_users' %}" class="sidebar-link active">
                   <i class="fas fa-users me-2"></i> Users
                 </a>
               </li>
               <li class="nav-item">
-                <a
-                  href="{% url 'admin_services' %}"
-                  class="sidebar-link active"
-                >
+                <a href="{% url 'admin_services' %}" class="sidebar-link">
                   <i class="fas fa-car-wash me-2"></i> Services
                 </a>
               </li>
@@ -80,7 +70,7 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a href="{% url 'admin_settings' %}" class="sidebar-link">
+                <a href="#" class="sidebar-link">
                   <i class="fas fa-cog me-2"></i> Settings
                 </a>
               </li>
@@ -99,7 +89,7 @@
         <!-- Main Content -->
         <div class="col-md-9 col-lg-10 content-area">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Car Wash Services</h2>
+            <h2>User Details</h2>
             <div>
               <span class="me-3">Welcome, {{ request.user.username }}</span>
               <a
@@ -111,78 +101,96 @@
             </div>
           </div>
 
-          <!-- Services List -->
+          <!-- User Details -->
           <div class="card">
             <div
               class="card-header bg-white d-flex justify-content-between align-items-center"
             >
-              <h5 class="card-title mb-0">All Services</h5>
+              <h5 class="card-title mb-0">User Information</h5>
               <div>
                 <a
-                  href="{% url 'add_service' %}"
-                  class="btn btn-primary btn-sm"
+                  href="{% url 'edit_user' user_obj.id %}"
+                  class="btn btn-warning btn-sm"
                 >
-                  <i class="fas fa-plus"></i> Add New Service
+                  <i class="fas fa-edit"></i> Edit User
                 </a>
-                <span class="badge bg-primary ms-2"
-                  >Total: {{ total_services|default:"0" }}</span
+                <a
+                  href="{% url 'delete_user' user_obj.id %}"
+                  class="btn btn-danger btn-sm ms-2"
                 >
+                  <i class="fas fa-trash"></i> Delete User
+                </a>
+                <a
+                  href="{% url 'admin_users' %}"
+                  class="btn btn-secondary btn-sm ms-2"
+                >
+                  <i class="fas fa-arrow-left"></i> Back to Users
+                </a>
               </div>
             </div>
             <div class="card-body">
-              {% if services %}
-              <div class="table-responsive">
-                <table class="table table-hover">
-                  <thead>
+              <div class="row">
+                <div class="col-md-6">
+                  <h6 class="fw-bold">Basic Information</h6>
+                  <table class="table table-bordered">
                     <tr>
-                      <th>ID</th>
-                      <th>Name</th>
-                      <th>Description</th>
-                      <th>Price</th>
-                      <th>Duration</th>
-                      <th>Actions</th>
+                      <th style="width: 150px">User ID</th>
+                      <td>{{ user_obj.id }}</td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {% for service in services %}
                     <tr>
-                      <td>{{ service.id }}</td>
-                      <td>{{ service.name }}</td>
-                      <td>{{ service.description|truncatechars:50 }}</td>
-                      <td>${{ service.price }}</td>
-                      <td>{{ service.duration_minutes }} minutes</td>
+                      <th>Username</th>
+                      <td>{{ user_obj.username }}</td>
+                    </tr>
+                    <tr>
+                      <th>Email</th>
+                      <td>{{ user_obj.email }}</td>
+                    </tr>
+                    <tr>
+                      <th>Full Name</th>
                       <td>
-                        <div class="btn-group">
-                          <a
-                            href="{% url 'edit_service' service.id %}"
-                            class="btn btn-sm btn-outline-warning"
-                            title="Edit Service"
-                          >
-                            <i class="fas fa-edit"></i>
-                          </a>
-                          <a
-                            href="{% url 'delete_service' service.id %}"
-                            class="btn btn-sm btn-outline-danger"
-                            title="Delete Service"
-                          >
-                            <i class="fas fa-trash"></i>
-                          </a>
-                        </div>
+                        {{ user_obj.first_name }} {{ user_obj.last_name }}
                       </td>
                     </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
+                    <tr>
+                      <th>Status</th>
+                      <td>
+                        {% if user_obj.is_active %}
+                        <span class="badge bg-success">Active</span>
+                        {% else %}
+                        <span class="badge bg-danger">Inactive</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>Date Joined</th>
+                      <td>{{ user_obj.date_joined|date:"M d, Y" }}</td>
+                    </tr>
+                    <tr>
+                      <th>Last Login</th>
+                      <td>{{ user_obj.last_login|date:"M d, Y H:i" }}</td>
+                    </tr>
+                  </table>
+                </div>
+                <div class="col-md-6">
+                  <h6 class="fw-bold">Profile Information</h6>
+                  <table class="table table-bordered">
+                    <tr>
+                      <th style="width: 150px">Phone Number</th>
+                      <td>
+                        {{ user_profile.phone_number|default:"Not provided" }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>User Type</th>
+                      <td>{{ user_profile.user_type|title }}</td>
+                    </tr>
+                    <tr>
+                      <th>Address</th>
+                      <td>{{ user_profile.address|default:"Not provided" }}</td>
+                    </tr>
+                  </table>
+                </div>
               </div>
-              {% else %}
-              <div class="text-center py-5">
-                <i class="fas fa-car-wash fa-4x text-muted mb-3"></i>
-                <p class="text-muted">No services found</p>
-                <a href="{% url 'add_service' %}" class="btn btn-primary">
-                  <i class="fas fa-plus"></i> Add Your First Service
-                </a>
-              </div>
-              {% endif %}
             </div>
           </div>
         </div>

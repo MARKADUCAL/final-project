@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Services | Admin Panel | AutoWash Hub</title>
+    <title>Edit Service | Admin Panel | AutoWash Hub</title>
     <!-- Bootstrap CSS -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
@@ -38,13 +38,6 @@
       .content-area {
         padding: 20px;
       }
-      .service-card {
-        transition: all 0.3s ease;
-      }
-      .service-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-      }
     </style>
   </head>
   <body>
@@ -75,12 +68,12 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a href="{% url 'admin_bookings' %}" class="sidebar-link">
+                <a href="#" class="sidebar-link">
                   <i class="fas fa-calendar-alt me-2"></i> Bookings
                 </a>
               </li>
               <li class="nav-item">
-                <a href="{% url 'admin_settings' %}" class="sidebar-link">
+                <a href="#" class="sidebar-link">
                   <i class="fas fa-cog me-2"></i> Settings
                 </a>
               </li>
@@ -99,7 +92,7 @@
         <!-- Main Content -->
         <div class="col-md-9 col-lg-10 content-area">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Car Wash Services</h2>
+            <h2>Edit Service</h2>
             <div>
               <span class="me-3">Welcome, {{ request.user.username }}</span>
               <a
@@ -111,78 +104,106 @@
             </div>
           </div>
 
-          <!-- Services List -->
+          <!-- Edit Service Form -->
           <div class="card">
             <div
               class="card-header bg-white d-flex justify-content-between align-items-center"
             >
-              <h5 class="card-title mb-0">All Services</h5>
+              <h5 class="card-title mb-0">Edit Service: {{ service.name }}</h5>
               <div>
                 <a
-                  href="{% url 'add_service' %}"
-                  class="btn btn-primary btn-sm"
+                  href="{% url 'admin_services' %}"
+                  class="btn btn-secondary btn-sm"
                 >
-                  <i class="fas fa-plus"></i> Add New Service
+                  <i class="fas fa-arrow-left"></i> Back to Services
                 </a>
-                <span class="badge bg-primary ms-2"
-                  >Total: {{ total_services|default:"0" }}</span
-                >
               </div>
             </div>
             <div class="card-body">
-              {% if services %}
-              <div class="table-responsive">
-                <table class="table table-hover">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Name</th>
-                      <th>Description</th>
-                      <th>Price</th>
-                      <th>Duration</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for service in services %}
-                    <tr>
-                      <td>{{ service.id }}</td>
-                      <td>{{ service.name }}</td>
-                      <td>{{ service.description|truncatechars:50 }}</td>
-                      <td>${{ service.price }}</td>
-                      <td>{{ service.duration_minutes }} minutes</td>
-                      <td>
-                        <div class="btn-group">
-                          <a
-                            href="{% url 'edit_service' service.id %}"
-                            class="btn btn-sm btn-outline-warning"
-                            title="Edit Service"
-                          >
-                            <i class="fas fa-edit"></i>
-                          </a>
-                          <a
-                            href="{% url 'delete_service' service.id %}"
-                            class="btn btn-sm btn-outline-danger"
-                            title="Delete Service"
-                          >
-                            <i class="fas fa-trash"></i>
-                          </a>
-                        </div>
-                      </td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
+              {% if messages %} {% for message in messages %}
+              <div
+                class="alert alert-{{ message.tags }} alert-dismissible fade show"
+                role="alert"
+              >
+                {{ message }}
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="alert"
+                  aria-label="Close"
+                ></button>
               </div>
-              {% else %}
-              <div class="text-center py-5">
-                <i class="fas fa-car-wash fa-4x text-muted mb-3"></i>
-                <p class="text-muted">No services found</p>
-                <a href="{% url 'add_service' %}" class="btn btn-primary">
-                  <i class="fas fa-plus"></i> Add Your First Service
-                </a>
-              </div>
-              {% endif %}
+              {% endfor %} {% endif %}
+
+              <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                  <label for="name" class="form-label">Service Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="name"
+                    name="name"
+                    value="{{ service.name }}"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="description" class="form-label"
+                    >Description</label
+                  >
+                  <textarea
+                    class="form-control"
+                    id="description"
+                    name="description"
+                    rows="4"
+                    required
+                  >
+{{ service.description }}</textarea
+                  >
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label for="price" class="form-label">Price ($)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        class="form-control"
+                        id="price"
+                        name="price"
+                        value="{{ service.price }}"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label for="duration_minutes" class="form-label"
+                        >Duration (minutes)</label
+                      >
+                      <input
+                        type="number"
+                        min="1"
+                        class="form-control"
+                        id="duration_minutes"
+                        name="duration_minutes"
+                        value="{{ service.duration_minutes }}"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-4 d-flex justify-content-between">
+                  <a href="{% url 'admin_services' %}" class="btn btn-secondary"
+                    >Cancel</a
+                  >
+                  <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Changes
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>

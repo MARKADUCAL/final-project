@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Booking Details | Admin Panel | AutoWash Hub</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      .sidebar {
+        min-height: 100vh;
+        background-color: #343a40;
+        color: #fff;
+      }
+      .sidebar-link {
+        color: #ced4da;
+        text-decoration: none;
+        display: block;
+        padding: 10px 15px;
+        transition: all 0.3s;
+      }
+      .sidebar-link:hover {
+        background-color: #495057;
+        color: #fff;
+      }
+      .sidebar-link.active {
+        background-color: #0d6efd;
+        color: #fff;
+      }
+      .content-area {
+        padding: 20px;
+      }
+      .status-badge {
+        font-size: 1rem;
+        padding: 0.5em 0.85em;
+      }
+      .status-pending {
+        background-color: #ffc107;
+        color: #212529;
+      }
+      .status-completed {
+        background-color: #198754;
+        color: #fff;
+      }
+      .status-cancelled {
+        background-color: #dc3545;
+        color: #fff;
+      }
+      .booking-info {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 p-0 sidebar">
+          <div class="d-flex flex-column p-3">
+            <h3 class="text-center mb-4">Admin Panel</h3>
+            <hr />
+            <ul class="nav flex-column">
+              <li class="nav-item">
+                <a href="{% url 'admin_dashboard' %}" class="sidebar-link">
+                  <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'admin_users' %}" class="sidebar-link">
+                  <i class="fas fa-users me-2"></i> Users
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'admin_services' %}" class="sidebar-link">
+                  <i class="fas fa-car-wash me-2"></i> Services
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'admin_bookings' %}" class="sidebar-link active">
+                  <i class="fas fa-calendar-alt me-2"></i> Bookings
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="sidebar-link">
+                  <i class="fas fa-cog me-2"></i> Settings
+                </a>
+              </li>
+              <li class="nav-item mt-5">
+                <a
+                  href="{% url 'admin_logout' %}"
+                  class="sidebar-link text-danger"
+                >
+                  <i class="fas fa-sign-out-alt me-2"></i> Logout
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 content-area">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Booking Details</h2>
+            <div>
+              <span class="me-3">Welcome, {{ request.user.username }}</span>
+              <a
+                href="{% url 'admin_logout' %}"
+                class="btn btn-outline-danger btn-sm"
+              >
+                <i class="fas fa-sign-out-alt"></i> Logout
+              </a>
+            </div>
+          </div>
+
+          {% if messages %}
+          <div class="row">
+            <div class="col-12">
+              {% for message in messages %}
+              <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- Booking Header -->
+          <div class="card mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+              <h5 class="card-title mb-0">
+                Booking #{{ booking.booking_id }}
+              </h5>
+              <div>
+                <a href="{% url 'admin_bookings' %}" class="btn btn-secondary btn-sm">
+                  <i class="fas fa-arrow-left"></i> Back to Bookings
+                </a>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-8">
+                  <h4>{{ booking.service.name }}</h4>
+                  <p class="text-muted">
+                    Booked by <strong>{{ booking.user.username }}</strong> on 
+                    {{ booking.created_at|date:"M d, Y H:i" }}
+                  </p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                  {% if booking.status == 'PENDING' %}
+                  <span class="badge status-badge status-pending">Pending</span>
+                  {% elif booking.status == 'COMPLETED' %}
+                  <span class="badge status-badge status-completed">Completed</span>
+                  {% elif booking.status == 'CANCELLED' %}
+                  <span class="badge status-badge status-cancelled">Cancelled</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <!-- Booking Details -->
+            <div class="col-md-8">
+              <div class="card mb-4">
+                <div class="card-header bg-white">
+                  <h5 class="card-title mb-0">Booking Information</h5>
+                </div>
+                <div class="card-body">
+                  <div class="row mb-4">
+                    <div class="col-md-6">
+                      <h6 class="fw-bold">Service Details</h6>
+                      <div class="booking-info mb-3">
+                        <p><strong>Service:</strong> {{ booking.service.name }}</p>
+                        <p><strong>Description:</strong> {{ booking.service.description }}</p>
+                        <p><strong>Price:</strong> ${{ booking.service.price }}</p>
+                        <p><strong>Duration:</strong> {{ booking.service.duration_minutes }} minutes</p>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <h6 class="fw-bold">Schedule</h6>
+                      <div class="booking-info">
+                        <p><strong>Date:</strong> {{ booking.date_time|date:"F d, Y" }}</p>
+                        <p><strong>Time:</strong> {{ booking.date_time|date:"h:i A" }}</p>
+                        <p><strong>Booked On:</strong> {{ booking.created_at|date:"F d, Y" }}</p>
+                        <p><strong>Last Updated:</strong> {{ booking.updated_at|date:"F d, Y h:i A" }}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-6">
+                      <h6 class="fw-bold">Vehicle Information</h6>
+                      <div class="booking-info mb-3">
+                        <p><strong>Make:</strong> {{ booking.vehicle_make }}</p>
+                        <p><strong>Model:</strong> {{ booking.vehicle_model }}</p>
+                        <p><strong>Type:</strong> {{ booking.get_vehicle_type_display }}</p>
+                        <p><strong>License Plate:</strong> {{ booking.license_plate }}</p>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <h6 class="fw-bold">Customer Information</h6>
+                      <div class="booking-info">
+                        <p><strong>Name:</strong> {{ booking.user.first_name }} {{ booking.user.last_name }}</p>
+                        <p><strong>Username:</strong> {{ booking.user.username }}</p>
+                        <p><strong>Email:</strong> {{ booking.user.email }}</p>
+                        <p><strong>Member Since:</strong> {{ booking.user.date_joined|date:"F d, Y" }}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {% if booking.additional_notes %}
+                  <div class="mt-4">
+                    <h6 class="fw-bold">Additional Notes</h6>
+                    <div class="booking-info">
+                      <p>{{ booking.additional_notes }}</p>
+                    </div>
+                  </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Update Status -->
+            <div class="col-md-4">
+              <div class="card">
+                <div class="card-header bg-white">
+                  <h5 class="card-title mb-0">Update Status</h5>
+                </div>
+                <div class="card-body">
+                  <form method="post" action="{% url 'update_booking_status' booking.id %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                      <label for="status" class="form-label">Booking Status</label>
+                      <select class="form-select" id="status" name="status">
+                        <option value="PENDING" {% if booking.status == 'PENDING' %}selected{% endif %}>Pending</option>
+                        <option value="COMPLETED" {% if booking.status == 'COMPLETED' %}selected{% endif %}>Completed</option>
+                        <option value="CANCELLED" {% if booking.status == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+                      </select>
+                    </div>
+                    <div class="d-grid">
+                      <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Update Status
+                      </button>
+                    </div>
+                  </form>
+
+                  <hr>
+
+                  <div class="status-info mt-4">
+                    <h6 class="fw-bold">Status Information</h6>
+                    <div class="mb-2">
+                      <span class="badge status-badge status-pending">Pending</span>
+                      <span class="ms-2">Booking is awaiting service</span>
+                    </div>
+                    <div class="mb-2">
+                      <span class="badge status-badge status-completed">Completed</span>
+                      <span class="ms-2">Service has been performed</span>
+                    </div>
+                    <div>
+                      <span class="badge status-badge status-cancelled">Cancelled</span>
+                      <span class="ms-2">Booking has been cancelled</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html> 

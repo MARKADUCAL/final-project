@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit User | Admin Panel | AutoWash Hub</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      .sidebar {
+        min-height: 100vh;
+        background-color: #343a40;
+        color: #fff;
+      }
+      .sidebar-link {
+        color: #ced4da;
+        text-decoration: none;
+        display: block;
+        padding: 10px 15px;
+        transition: all 0.3s;
+      }
+      .sidebar-link:hover {
+        background-color: #495057;
+        color: #fff;
+      }
+      .sidebar-link.active {
+        background-color: #0d6efd;
+        color: #fff;
+      }
+      .content-area {
+        padding: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 p-0 sidebar">
+          <div class="d-flex flex-column p-3">
+            <h3 class="text-center mb-4">Admin Panel</h3>
+            <hr />
+            <ul class="nav flex-column">
+              <li class="nav-item">
+                <a href="{% url 'admin_dashboard' %}" class="sidebar-link">
+                  <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'admin_users' %}" class="sidebar-link active">
+                  <i class="fas fa-users me-2"></i> Users
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'admin_services' %}" class="sidebar-link">
+                  <i class="fas fa-car-wash me-2"></i> Services
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="sidebar-link">
+                  <i class="fas fa-calendar-alt me-2"></i> Bookings
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="sidebar-link">
+                  <i class="fas fa-cog me-2"></i> Settings
+                </a>
+              </li>
+              <li class="nav-item mt-5">
+                <a
+                  href="{% url 'admin_logout' %}"
+                  class="sidebar-link text-danger"
+                >
+                  <i class="fas fa-sign-out-alt me-2"></i> Logout
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 content-area">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Edit User</h2>
+            <div>
+              <span class="me-3">Welcome, {{ request.user.username }}</span>
+              <a
+                href="{% url 'admin_logout' %}"
+                class="btn btn-outline-danger btn-sm"
+              >
+                <i class="fas fa-sign-out-alt"></i> Logout
+              </a>
+            </div>
+          </div>
+
+          <!-- Edit User Form -->
+          <div class="card">
+            <div
+              class="card-header bg-white d-flex justify-content-between align-items-center"
+            >
+              <h5 class="card-title mb-0">
+                Edit User: {{ user_obj.username }}
+              </h5>
+              <div>
+                <a
+                  href="{% url 'user_details' user_obj.id %}"
+                  class="btn btn-secondary btn-sm"
+                >
+                  <i class="fas fa-arrow-left"></i> Back to User Details
+                </a>
+              </div>
+            </div>
+            <div class="card-body">
+              <form method="post">
+                {% csrf_token %}
+                <div class="row">
+                  <div class="col-md-6">
+                    <h6 class="fw-bold mb-3">Basic Information</h6>
+                    <div class="mb-3">
+                      <label for="username" class="form-label">Username</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="username"
+                        name="username"
+                        value="{{ user_obj.username }}"
+                        required
+                      />
+                    </div>
+                    <div class="mb-3">
+                      <label for="email" class="form-label">Email</label>
+                      <input
+                        type="email"
+                        class="form-control"
+                        id="email"
+                        name="email"
+                        value="{{ user_obj.email }}"
+                        required
+                      />
+                    </div>
+                    <div class="mb-3">
+                      <label for="first_name" class="form-label"
+                        >First Name</label
+                      >
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="first_name"
+                        name="first_name"
+                        value="{{ user_obj.first_name }}"
+                      />
+                    </div>
+                    <div class="mb-3">
+                      <label for="last_name" class="form-label"
+                        >Last Name</label
+                      >
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="last_name"
+                        name="last_name"
+                        value="{{ user_obj.last_name }}"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <h6 class="fw-bold mb-3">Profile Information</h6>
+                    <div class="mb-3">
+                      <label for="phone_number" class="form-label"
+                        >Phone Number</label
+                      >
+                      <input
+                        type="tel"
+                        class="form-control"
+                        id="phone_number"
+                        name="phone_number"
+                        value="{{ user_profile.phone_number }}"
+                      />
+                    </div>
+                    <div class="mb-3">
+                      <label for="address" class="form-label">Address</label>
+                      <textarea
+                        class="form-control"
+                        id="address"
+                        name="address"
+                        rows="3"
+                      >
+{{ user_profile.address }}</textarea
+                      >
+                    </div>
+                    <div class="mb-3 form-check">
+                      <input
+                        type="checkbox"
+                        class="form-check-input"
+                        id="is_active"
+                        name="is_active"
+                        {%
+                        if
+                        user_obj.is_active
+                        %}checked{%
+                        endif
+                        %}
+                      />
+                      <label class="form-check-label" for="is_active"
+                        >Active Account</label
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-4 d-flex justify-content-between">
+                  <a
+                    href="{% url 'user_details' user_obj.id %}"
+                    class="btn btn-secondary"
+                    >Cancel</a
+                  >
+                  <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Changes
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

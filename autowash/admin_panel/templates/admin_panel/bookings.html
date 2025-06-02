@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Users | Admin Panel | AutoWash Hub</title>
+    <title>Bookings | Admin Panel | AutoWash Hub</title>
     <!-- Bootstrap CSS -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
@@ -38,6 +38,22 @@
       .content-area {
         padding: 20px;
       }
+      .status-badge {
+        font-size: 0.85rem;
+        padding: 0.35em 0.65em;
+      }
+      .status-pending {
+        background-color: #ffc107;
+        color: #212529;
+      }
+      .status-completed {
+        background-color: #198754;
+        color: #fff;
+      }
+      .status-cancelled {
+        background-color: #dc3545;
+        color: #fff;
+      }
     </style>
   </head>
   <body>
@@ -55,7 +71,7 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a href="{% url 'admin_users' %}" class="sidebar-link active">
+                <a href="{% url 'admin_users' %}" class="sidebar-link">
                   <i class="fas fa-users me-2"></i> Users
                 </a>
               </li>
@@ -65,7 +81,7 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a href="{% url 'admin_bookings' %}" class="sidebar-link">
+                <a href="{% url 'admin_bookings' %}" class="sidebar-link active">
                   <i class="fas fa-calendar-alt me-2"></i> Bookings
                 </a>
               </li>
@@ -89,7 +105,7 @@
         <!-- Main Content -->
         <div class="col-md-9 col-lg-10 content-area">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Customer Users</h2>
+            <h2>Bookings Management</h2>
             <div>
               <span class="me-3">Welcome, {{ request.user.username }}</span>
               <a
@@ -101,72 +117,96 @@
             </div>
           </div>
 
-          <!-- Users List -->
+          <!-- Filter Options -->
+          <div class="card mb-4">
+            <div class="card-header bg-white">
+              <h5 class="card-title mb-0">Filter Bookings</h5>
+            </div>
+            <div class="card-body">
+              <form method="get" class="row g-3">
+                <div class="col-md-4">
+                  <label for="status" class="form-label">Status</label>
+                  <select class="form-select" id="status" name="status">
+                    <option value="">All Statuses</option>
+                    {% for status_code, status_name in status_choices %}
+                    <option value="{{ status_code }}" {% if status_filter == status_code %}selected{% endif %}>
+                      {{ status_name }}
+                    </option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label for="date" class="form-label">Date</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="date"
+                    name="date"
+                    value="{{ date_filter }}"
+                  />
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                  <button type="submit" class="btn btn-primary me-2">
+                    <i class="fas fa-filter"></i> Filter
+                  </button>
+                  <a href="{% url 'admin_bookings' %}" class="btn btn-secondary">
+                    <i class="fas fa-sync"></i> Reset
+                  </a>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Bookings List -->
           <div class="card">
             <div
               class="card-header bg-white d-flex justify-content-between align-items-center"
             >
-              <h5 class="card-title mb-0">All Customers</h5>
-              <div>
-                <span class="badge bg-primary"
-                  >Total: {{ total_customers|default:"0" }}</span
-                >
-              </div>
+              <h5 class="card-title mb-0">All Bookings</h5>
+              <span class="badge bg-primary">
+                Total: {{ total_bookings|default:"0" }}
+              </span>
             </div>
             <div class="card-body">
-              {% if customers %}
+              {% if bookings %}
               <div class="table-responsive">
                 <table class="table table-hover">
                   <thead>
                     <tr>
-                      <th>ID</th>
-                      <th>Username</th>
-                      <th>Email</th>
-                      <th>Name</th>
-                      <th>Date Joined</th>
+                      <th>Booking ID</th>
+                      <th>Customer</th>
+                      <th>Service</th>
+                      <th>Date & Time</th>
+                      <th>Vehicle</th>
                       <th>Status</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {% for user in customers %}
+                    {% for booking in bookings %}
                     <tr>
-                      <td>{{ user.id }}</td>
-                      <td>{{ user.username }}</td>
-                      <td>{{ user.email }}</td>
-                      <td>{{ user.first_name }} {{ user.last_name }}</td>
-                      <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                      <td>{{ booking.booking_id }}</td>
+                      <td>{{ booking.user.username }}</td>
+                      <td>{{ booking.service.name }}</td>
+                      <td>{{ booking.date_time|date:"M d, Y H:i" }}</td>
+                      <td>{{ booking.vehicle_make }} {{ booking.vehicle_model }}</td>
                       <td>
-                        {% if user.is_active %}
-                        <span class="badge bg-success">Active</span>
-                        {% else %}
-                        <span class="badge bg-danger">Inactive</span>
+                        {% if booking.status == 'PENDING' %}
+                        <span class="badge status-badge status-pending">Pending</span>
+                        {% elif booking.status == 'COMPLETED' %}
+                        <span class="badge status-badge status-completed">Completed</span>
+                        {% elif booking.status == 'CANCELLED' %}
+                        <span class="badge status-badge status-cancelled">Cancelled</span>
                         {% endif %}
                       </td>
                       <td>
-                        <div class="btn-group">
-                          <a
-                            href="{% url 'user_details' user.id %}"
-                            class="btn btn-sm btn-outline-primary"
-                            title="View User Details"
-                          >
-                            <i class="fas fa-eye"></i>
-                          </a>
-                          <a
-                            href="{% url 'edit_user' user.id %}"
-                            class="btn btn-sm btn-outline-warning"
-                            title="Edit User"
-                          >
-                            <i class="fas fa-edit"></i>
-                          </a>
-                          <a
-                            href="{% url 'delete_user' user.id %}"
-                            class="btn btn-sm btn-outline-danger"
-                            title="Delete User"
-                          >
-                            <i class="fas fa-trash"></i>
-                          </a>
-                        </div>
+                        <a
+                          href="{% url 'booking_details' booking.id %}"
+                          class="btn btn-sm btn-outline-primary"
+                          title="View Details"
+                        >
+                          <i class="fas fa-eye"></i>
+                        </a>
                       </td>
                     </tr>
                     {% endfor %}
@@ -174,7 +214,10 @@
                 </table>
               </div>
               {% else %}
-              <p class="text-muted text-center py-3">No customers found</p>
+              <div class="text-center py-5">
+                <i class="fas fa-calendar-times fa-4x text-muted mb-3"></i>
+                <p class="text-muted">No bookings found</p>
+              </div>
               {% endif %}
             </div>
           </div>
@@ -185,4 +228,4 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   </body>
-</html>
+</html> 

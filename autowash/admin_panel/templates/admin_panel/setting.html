@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Settings | Admin Panel | AutoWash Hub</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      .sidebar {
+        min-height: 100vh;
+        background-color: #343a40;
+        color: #fff;
+      }
+      .sidebar-link {
+        color: #ced4da;
+        text-decoration: none;
+        display: block;
+        padding: 10px 15px;
+        transition: all 0.3s;
+      }
+      .sidebar-link:hover {
+        background-color: #495057;
+        color: #fff;
+      }
+      .sidebar-link.active {
+        background-color: #0d6efd;
+        color: #fff;
+      }
+      .content-area {
+        padding: 20px;
+      }
+      .settings-nav .nav-link {
+        color: #495057;
+        border-radius: 0;
+        padding: 0.75rem 1.25rem;
+      }
+      .settings-nav .nav-link.active {
+        color: #0d6efd;
+        background-color: #f8f9fa;
+        border-left: 3px solid #0d6efd;
+      }
+      .settings-nav .nav-link:hover:not(.active) {
+        background-color: #f1f3f5;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 p-0 sidebar">
+          <div class="d-flex flex-column p-3">
+            <h3 class="text-center mb-4">Admin Panel</h3>
+            <hr />
+            <ul class="nav flex-column">
+              <li class="nav-item">
+                <a href="{% url 'admin_dashboard' %}" class="sidebar-link">
+                  <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'admin_users' %}" class="sidebar-link">
+                  <i class="fas fa-users me-2"></i> Users
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'admin_services' %}" class="sidebar-link">
+                  <i class="fas fa-car-wash me-2"></i> Services
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'admin_bookings' %}" class="sidebar-link">
+                  <i class="fas fa-calendar-alt me-2"></i> Bookings
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  href="{% url 'admin_settings' %}"
+                  class="sidebar-link active"
+                >
+                  <i class="fas fa-cog me-2"></i> Settings
+                </a>
+              </li>
+              <li class="nav-item mt-5">
+                <a
+                  href="{% url 'admin_logout' %}"
+                  class="sidebar-link text-danger"
+                >
+                  <i class="fas fa-sign-out-alt me-2"></i> Logout
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 content-area">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>System Settings</h2>
+            <div>
+              <span class="me-3">Welcome, {{ request.user.username }}</span>
+              <a
+                href="{% url 'admin_logout' %}"
+                class="btn btn-outline-danger btn-sm"
+              >
+                <i class="fas fa-sign-out-alt"></i> Logout
+              </a>
+            </div>
+          </div>
+
+          {% if messages %}
+          <div class="row">
+            <div class="col-12">
+              {% for message in messages %}
+              <div
+                class="alert alert-{{ message.tags }} alert-dismissible fade show"
+                role="alert"
+              >
+                {{ message }}
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="alert"
+                  aria-label="Close"
+                ></button>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          <div class="row">
+            <!-- Settings Navigation -->
+            <div class="col-md-3 mb-4">
+              <div class="card">
+                <div class="card-header bg-white">
+                  <h5 class="card-title mb-0">Settings</h5>
+                </div>
+                <div class="card-body p-0">
+                  <nav class="settings-nav">
+                    <div
+                      class="nav flex-column nav-pills"
+                      id="settings-tab"
+                      role="tablist"
+                    >
+                      <button
+                        class="nav-link active"
+                        id="general-tab"
+                        data-bs-toggle="pill"
+                        data-bs-target="#general"
+                        type="button"
+                        role="tab"
+                      >
+                        <i class="fas fa-sliders-h me-2"></i> General
+                      </button>
+                      <button
+                        class="nav-link"
+                        id="appearance-tab"
+                        data-bs-toggle="pill"
+                        data-bs-target="#appearance"
+                        type="button"
+                        role="tab"
+                      >
+                        <i class="fas fa-palette me-2"></i> Appearance
+                      </button>
+                      <button
+                        class="nav-link"
+                        id="booking-tab"
+                        data-bs-toggle="pill"
+                        data-bs-target="#booking"
+                        type="button"
+                        role="tab"
+                      >
+                        <i class="fas fa-calendar-alt me-2"></i> Booking
+                      </button>
+                      <button
+                        class="nav-link"
+                        id="notifications-tab"
+                        data-bs-toggle="pill"
+                        data-bs-target="#notifications"
+                        type="button"
+                        role="tab"
+                      >
+                        <i class="fas fa-bell me-2"></i> Notifications
+                      </button>
+                      <button
+                        class="nav-link"
+                        id="account-tab"
+                        data-bs-toggle="pill"
+                        data-bs-target="#account"
+                        type="button"
+                        role="tab"
+                      >
+                        <i class="fas fa-user-cog me-2"></i> My Account
+                      </button>
+                      <button
+                        class="nav-link"
+                        id="security-tab"
+                        data-bs-toggle="pill"
+                        data-bs-target="#security"
+                        type="button"
+                        role="tab"
+                      >
+                        <i class="fas fa-shield-alt me-2"></i> Security
+                      </button>
+                    </div>
+                  </nav>
+                </div>
+              </div>
+            </div>
+
+            <!-- Settings Content -->
+            <div class="col-md-9">
+              <div class="card">
+                <div class="card-body">
+                  <div class="tab-content" id="settings-tabContent">
+                    <!-- General Settings -->
+                    <div
+                      class="tab-pane fade show active"
+                      id="general"
+                      role="tabpanel"
+                      aria-labelledby="general-tab"
+                    >
+                      <h4 class="mb-4">General Settings</h4>
+                      <form method="post" action="{% url 'admin_settings' %}">
+                        {% csrf_token %}
+                        <input
+                          type="hidden"
+                          name="setting_type"
+                          value="general"
+                        />
+
+                        <div class="mb-3">
+                          <label for="site_name" class="form-label"
+                            >Site Name</label
+                          >
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="site_name"
+                            name="site_name"
+                            value="{{ settings.site_name }}"
+                          />
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="site_description" class="form-label"
+                            >Site Description</label
+                          >
+                          <textarea
+                            class="form-control"
+                            id="site_description"
+                            name="site_description"
+                            rows="2"
+                          >
+{{ settings.site_description }}</textarea
+                          >
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="contact_email" class="form-label"
+                            >Contact Email</label
+                          >
+                          <input
+                            type="email"
+                            class="form-control"
+                            id="contact_email"
+                            name="contact_email"
+                            value="{{ settings.contact_email }}"
+                          />
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="contact_phone" class="form-label"
+                            >Contact Phone</label
+                          >
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="contact_phone"
+                            name="contact_phone"
+                            value="{{ settings.contact_phone }}"
+                          />
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="business_hours" class="form-label"
+                            >Business Hours</label
+                          >
+                          <textarea
+                            class="form-control"
+                            id="business_hours"
+                            name="business_hours"
+                            rows="3"
+                          >
+{{ settings.business_hours }}</textarea
+                          >
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="address" class="form-label"
+                            >Business Address</label
+                          >
+                          <textarea
+                            class="form-control"
+                            id="address"
+                            name="address"
+                            rows="2"
+                          >
+{{ settings.address }}</textarea
+                          >
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                          <i class="fas fa-save me-1"></i> Save Changes
+                        </button>
+                      </form>
+                    </div>
+
+                    <!-- Appearance Settings -->
+                    <div
+                      class="tab-pane fade"
+                      id="appearance"
+                      role="tabpanel"
+                      aria-labelledby="appearance-tab"
+                    >
+                      <h4 class="mb-4">Appearance Settings</h4>
+                      <form
+                        method="post"
+                        action="{% url 'admin_settings' %}"
+                        enctype="multipart/form-data"
+                      >
+                        {% csrf_token %}
+                        <input
+                          type="hidden"
+                          name="setting_type"
+                          value="appearance"
+                        />
+
+                        <div class="mb-3">
+                          <label for="primary_color" class="form-label"
+                            >Primary Color</label
+                          >
+                          <div class="input-group">
+                            <span class="input-group-text">#</span>
+                            <input
+                              type="text"
+                              class="form-control"
+                              id="primary_color"
+                              name="primary_color"
+                              value="{{ settings.primary_color|slice:'1:' }}"
+                            />
+                            <input
+                              type="color"
+                              class="form-control form-control-color"
+                              value="{{ settings.primary_color }}"
+                              title="Choose primary color"
+                              aria-label="Primary color picker"
+                            />
+                          </div>
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="secondary_color" class="form-label"
+                            >Secondary Color</label
+                          >
+                          <div class="input-group">
+                            <span class="input-group-text">#</span>
+                            <input
+                              type="text"
+                              class="form-control"
+                              id="secondary_color"
+                              name="secondary_color"
+                              value="{{ settings.secondary_color|slice:'1:' }}"
+                            />
+                            <input
+                              type="color"
+                              class="form-control form-control-color"
+                              value="{{ settings.secondary_color }}"
+                              title="Choose secondary color"
+                              aria-label="Secondary color picker"
+                            />
+                          </div>
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="logo" class="form-label">Site Logo</label>
+                          <input
+                            type="file"
+                            class="form-control"
+                            id="logo"
+                            name="logo"
+                          />
+                          <div class="form-text">
+                            Recommended size: 200x50 pixels
+                          </div>
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="favicon" class="form-label"
+                            >Favicon</label
+                          >
+                          <input
+                            type="file"
+                            class="form-control"
+                            id="favicon"
+                            name="favicon"
+                          />
+                          <div class="form-text">
+                            Recommended size: 32x32 pixels
+                          </div>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                          <input
+                            type="checkbox"
+                            class="form-check-input"
+                            id="enable_dark_mode"
+                            name="enable_dark_mode"
+                            {% if settings.enable_dark_mode %}checked{% endif %}
+                          />
+                          <label class="form-check-label" for="enable_dark_mode"
+                            >Enable Dark Mode Option</label
+                          >
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                          <i class="fas fa-save me-1"></i> Save Changes
+                        </button>
+                      </form>
+                    </div>
+
+                    <!-- Booking Settings -->
+                    <div
+                      class="tab-pane fade"
+                      id="booking"
+                      role="tabpanel"
+                      aria-labelledby="booking-tab"
+                    >
+                      <h4 class="mb-4">Booking Settings</h4>
+                      <form method="post" action="{% url 'admin_settings' %}">
+                        {% csrf_token %}
+                        <input
+                          type="hidden"
+                          name="setting_type"
+                          value="booking"
+                        />
+
+                        <div class="mb-3">
+                          <label for="booking_interval" class="form-label"
+                            >Booking Time Interval (minutes)</label
+                          >
+                          <select
+                            class="form-select"
+                            id="booking_interval"
+                            name="booking_interval"
+                          >
+                            <option value="15" {% if settings.booking_interval == 15 %}selected{% endif %}>15 minutes</option>
+                            <option value="30" {% if settings.booking_interval == 30 %}selected{% endif %}>30 minutes</option>
+                            <option value="60" {% if settings.booking_interval == 60 %}selected{% endif %}>60 minutes</option>
+                          </select>
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="min_advance_booking" class="form-label"
+                            >Minimum Advance Booking (hours)</label
+                          >
+                          <input
+                            type="number"
+                            class="form-control"
+                            id="min_advance_booking"
+                            name="min_advance_booking"
+                            value="{{ settings.min_advance_booking }}"
+                          />
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="max_advance_booking" class="form-label"
+                            >Maximum Advance Booking (days)</label
+                          >
+                          <input
+                            type="number"
+                            class="form-control"
+                            id="max_advance_booking"
+                            name="max_advance_booking"
+                            value="{{ settings.max_advance_booking }}"
+                          />
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="max_daily_bookings" class="form-label"
+                            >Maximum Daily Bookings</label
+                          >
+                          <input
+                            type="number"
+                            class="form-control"
+                            id="max_daily_bookings"
+                            name="max_daily_bookings"
+                            value="{{ settings.max_daily_bookings }}"
+                          />
+                        </div>
+
+                        <div class="mb-3 form-check">
+                          <input
+                            type="checkbox"
+                            class="form-check-input"
+                            id="allow_same_day_booking"
+                            name="allow_same_day_booking"
+                            {% if settings.allow_same_day_booking %}checked{% endif %}
+                          />
+                          <label
+                            class="form-check-label"
+                            for="allow_same_day_booking"
+                            >Allow Same-Day Booking</label
+                          >
+                        </div>
+
+                        <div class="mb-3 form-check">
+                          <input
+                            type="checkbox"
+                            class="form-check-input"
+                            id="require_payment"
+                            name="require_payment"
+                            {% if settings.require_payment %}checked{% endif %}
+                          />
+                          <label class="form-check-label" for="require_payment"
+                            >Require Payment at Booking</label
+                          >
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                          <i class="fas fa-save me-1"></i> Save Changes
+                        </button>
+                      </form>
+                    </div>
+
+                    <!-- Notifications Settings -->
+                    <div
+                      class="tab-pane fade"
+                      id="notifications"
+                      role="tabpanel"
+                      aria-labelledby="notifications-tab"
+                    >
+                      <h4 class="mb-4">Notification Settings</h4>
+                      <form method="post" action="{% url 'admin_settings' %}">
+                        {% csrf_token %}
+                        <input
+                          type="hidden"
+                          name="setting_type"
+                          value="notifications"
+                        />
+
+                        <h5 class="mb-3">Email Notifications</h5>
+
+                        <div class="mb-3 form-check">
+                          <input
+                            type="checkbox"
+                            class="form-check-input"
+                            id="notify_new_booking"
+                            name="notify_new_booking"
+                            {% if settings.notify_new_booking %}checked{% endif %}
+                          />
+                          <label
+                            class="form-check-label"
+                            for="notify_new_booking"
+                            >New Booking Notification</label
+                          >
+                        </div>
+
+                        <div class="mb-3 form-check">
+                          <input
+                            type="checkbox"
+                            class="form-check-input"
+                            id="notify_cancelled_booking"
+                            name="notify_cancelled_booking"
+                            {% if settings.notify_cancelled_booking %}checked{% endif %}
+                          />
+                          <label
+                            class="form-check-label"
+                            for="notify_cancelled_booking"
+                            >Cancelled Booking Notification</label
+                          >
+                        </div>
+
+                        <div class="mb-3 form-check">
+                          <input
+                            type="checkbox"
+                            class="form-check-input"
+                            id="notify_new_user"
+                            name="notify_new_user"
+                            {% if settings.notify_new_user %}checked{% endif %}
+                          />
+                          <label class="form-check-label" for="notify_new_user"
+                            >New User Registration Notification</label
+                          >
+                        </div>
+
+                        <h5 class="mb-3 mt-4">Customer Notifications</h5>
+
+                        <div class="mb-3 form-check">
+                          <input
+                            type="checkbox"
+                            class="form-check-input"
+                            id="send_booking_confirmation"
+                            name="send_booking_confirmation"
+                            {% if settings.send_booking_confirmation %}checked{% endif %}
+                          />
+                          <label
+                            class="form-check-label"
+                            for="send_booking_confirmation"
+                            >Send Booking Confirmation Email</label
+                          >
+                        </div>
+
+                        <div class="mb-3 form-check">
+                          <input
+                            type="checkbox"
+                            class="form-check-input"
+                            id="send_booking_reminder"
+                            name="send_booking_reminder"
+                            {% if settings.send_booking_reminder %}checked{% endif %}
+                          />
+                          <label
+                            class="form-check-label"
+                            for="send_booking_reminder"
+                            >Send Booking Reminder Email</label
+                          >
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="reminder_hours" class="form-label"
+                            >Send Reminder Hours Before Appointment</label
+                          >
+                          <input
+                            type="number"
+                            class="form-control"
+                            id="reminder_hours"
+                            name="reminder_hours"
+                            value="{{ settings.reminder_hours }}"
+                          />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                          <i class="fas fa-save me-1"></i> Save Changes
+                        </button>
+                      </form>
+                    </div>
+
+                    <!-- Account Settings -->
+                    <div
+                      class="tab-pane fade"
+                      id="account"
+                      role="tabpanel"
+                      aria-labelledby="account-tab"
+                    >
+                      <h4 class="mb-4">My Account Settings</h4>
+                      <form method="post" action="{% url 'admin_settings' %}">
+                        {% csrf_token %}
+                        <input
+                          type="hidden"
+                          name="setting_type"
+                          value="account"
+                        />
+
+                        <div class="mb-3">
+                          <label for="username" class="form-label"
+                            >Username</label
+                          >
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="username"
+                            name="username"
+                            value="{{ request.user.username }}"
+                            readonly
+                          />
+                          <div class="form-text">
+                            Username cannot be changed
+                          </div>
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="email" class="form-label"
+                            >Email Address</label
+                          >
+                          <input
+                            type="email"
+                            class="form-control"
+                            id="email"
+                            name="email"
+                            value="{{ request.user.email }}"
+                          />
+                        </div>
+
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="mb-3">
+                              <label for="first_name" class="form-label"
+                                >First Name</label
+                              >
+                              <input
+                                type="text"
+                                class="form-control"
+                                id="first_name"
+                                name="first_name"
+                                value="{{ request.user.first_name }}"
+                              />
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="mb-3">
+                              <label for="last_name" class="form-label"
+                                >Last Name</label
+                              >
+                              <input
+                                type="text"
+                                class="form-control"
+                                id="last_name"
+                                name="last_name"
+                                value="{{ request.user.last_name }}"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="position" class="form-label"
+                            >Position/Role</label
+                          >
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="position"
+                            name="position"
+                            value="Administrator"
+                          />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                          <i class="fas fa-save me-1"></i> Update Profile
+                        </button>
+                      </form>
+                    </div>
+
+                    <!-- Security Settings -->
+                    <div
+                      class="tab-pane fade"
+                      id="security"
+                      role="tabpanel"
+                      aria-labelledby="security-tab"
+                    >
+                      <h4 class="mb-4">Security Settings</h4>
+                      <form method="post" action="{% url 'admin_settings' %}">
+                        {% csrf_token %}
+                        <input
+                          type="hidden"
+                          name="setting_type"
+                          value="security"
+                        />
+
+                        <h5 class="mb-3">Change Password</h5>
+
+                        <div class="mb-3">
+                          <label for="current_password" class="form-label"
+                            >Current Password</label
+                          >
+                          <input
+                            type="password"
+                            class="form-control"
+                            id="current_password"
+                            name="current_password"
+                          />
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="new_password" class="form-label"
+                            >New Password</label
+                          >
+                          <input
+                            type="password"
+                            class="form-control"
+                            id="new_password"
+                            name="new_password"
+                          />
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="confirm_password" class="form-label"
+                            >Confirm New Password</label
+                          >
+                          <input
+                            type="password"
+                            class="form-control"
+                            id="confirm_password"
+                            name="confirm_password"
+                          />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                          <i class="fas fa-key me-1"></i> Change Password
+                        </button>
+                      </form>
+
+                      <hr class="my-4" />
+
+                      <h5 class="mb-3">Login History</h5>
+                      <div class="table-responsive">
+                        <table class="table table-hover">
+                          <thead>
+                            <tr>
+                              <th>Date/Time</th>
+                              <th>IP Address</th>
+                              <th>Device</th>
+                              <th>Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>{{ now|date:"M d, Y H:i" }}</td>
+                              <td>127.0.0.1</td>
+                              <td>Chrome on Windows</td>
+                              <td>
+                                <span class="badge bg-success">Success</span>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>{{ now|date:"M d, Y H:i" }}</td>
+                              <td>127.0.0.1</td>
+                              <td>Chrome on Windows</td>
+                              <td>
+                                <span class="badge bg-success">Success</span>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Services | Admin Panel | AutoWash Hub</title>
+    <title>Delete Service | Admin Panel | AutoWash Hub</title>
     <!-- Bootstrap CSS -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
@@ -38,13 +38,6 @@
       .content-area {
         padding: 20px;
       }
-      .service-card {
-        transition: all 0.3s ease;
-      }
-      .service-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-      }
     </style>
   </head>
   <body>
@@ -75,12 +68,12 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a href="{% url 'admin_bookings' %}" class="sidebar-link">
+                <a href="#" class="sidebar-link">
                   <i class="fas fa-calendar-alt me-2"></i> Bookings
                 </a>
               </li>
               <li class="nav-item">
-                <a href="{% url 'admin_settings' %}" class="sidebar-link">
+                <a href="#" class="sidebar-link">
                   <i class="fas fa-cog me-2"></i> Settings
                 </a>
               </li>
@@ -99,7 +92,7 @@
         <!-- Main Content -->
         <div class="col-md-9 col-lg-10 content-area">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Car Wash Services</h2>
+            <h2>Delete Service</h2>
             <div>
               <span class="me-3">Welcome, {{ request.user.username }}</span>
               <a
@@ -111,78 +104,56 @@
             </div>
           </div>
 
-          <!-- Services List -->
+          <!-- Delete Service Confirmation -->
           <div class="card">
-            <div
-              class="card-header bg-white d-flex justify-content-between align-items-center"
-            >
-              <h5 class="card-title mb-0">All Services</h5>
-              <div>
-                <a
-                  href="{% url 'add_service' %}"
-                  class="btn btn-primary btn-sm"
-                >
-                  <i class="fas fa-plus"></i> Add New Service
-                </a>
-                <span class="badge bg-primary ms-2"
-                  >Total: {{ total_services|default:"0" }}</span
-                >
-              </div>
+            <div class="card-header bg-danger text-white">
+              <h5 class="card-title mb-0">
+                <i class="fas fa-exclamation-triangle me-2"></i> Confirm Service
+                Deletion
+              </h5>
             </div>
             <div class="card-body">
-              {% if services %}
-              <div class="table-responsive">
-                <table class="table table-hover">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Name</th>
-                      <th>Description</th>
-                      <th>Price</th>
-                      <th>Duration</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for service in services %}
-                    <tr>
-                      <td>{{ service.id }}</td>
-                      <td>{{ service.name }}</td>
-                      <td>{{ service.description|truncatechars:50 }}</td>
-                      <td>${{ service.price }}</td>
-                      <td>{{ service.duration_minutes }} minutes</td>
-                      <td>
-                        <div class="btn-group">
-                          <a
-                            href="{% url 'edit_service' service.id %}"
-                            class="btn btn-sm btn-outline-warning"
-                            title="Edit Service"
-                          >
-                            <i class="fas fa-edit"></i>
-                          </a>
-                          <a
-                            href="{% url 'delete_service' service.id %}"
-                            class="btn btn-sm btn-outline-danger"
-                            title="Delete Service"
-                          >
-                            <i class="fas fa-trash"></i>
-                          </a>
-                        </div>
-                      </td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
+              <div class="alert alert-warning">
+                <h4 class="alert-heading">Warning!</h4>
+                <p>
+                  You are about to delete the service
+                  <strong>{{ service.name }}</strong>.
+                </p>
+                <p>
+                  This action cannot be undone. Any bookings associated with
+                  this service may be affected.
+                </p>
               </div>
-              {% else %}
-              <div class="text-center py-5">
-                <i class="fas fa-car-wash fa-4x text-muted mb-3"></i>
-                <p class="text-muted">No services found</p>
-                <a href="{% url 'add_service' %}" class="btn btn-primary">
-                  <i class="fas fa-plus"></i> Add Your First Service
-                </a>
+
+              <div class="card mb-4">
+                <div class="card-header bg-light">
+                  <h6 class="mb-0">Service Information</h6>
+                </div>
+                <div class="card-body">
+                  <p><strong>Name:</strong> {{ service.name }}</p>
+                  <p><strong>Description:</strong> {{ service.description }}</p>
+                  <p><strong>Price:</strong> ${{ service.price }}</p>
+                  <p>
+                    <strong>Duration:</strong> {{ service.duration_minutes }}
+                    minutes
+                  </p>
+                </div>
               </div>
-              {% endif %}
+
+              <form method="post">
+                {% csrf_token %}
+                <div class="d-flex justify-content-between">
+                  <a
+                    href="{% url 'admin_services' %}"
+                    class="btn btn-secondary"
+                  >
+                    <i class="fas fa-times"></i> Cancel
+                  </a>
+                  <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Confirm Deletion
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>

@@ -7,7 +7,6 @@ import uuid
 class UserProfile(models.Model):
     USER_TYPE_CHOICES = (
         ('customer', 'Customer'),
-        ('staff', 'Staff'),
         ('admin', 'Administrator'),
     )
     
